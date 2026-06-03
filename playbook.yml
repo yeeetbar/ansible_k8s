@@ -1,0 +1,13 @@
+---
+
+- hosts: all
+  become: true
+  roles:
+    - base
+  tasks:
+  - name: add ssh key to yeeet
+    tags: always
+    authorized_key:
+      user: ansible_user
+      key: "{{ lookup('file', '~/.ssh/ansible.pub') }}"
+  
