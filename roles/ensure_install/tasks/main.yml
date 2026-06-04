@@ -1,0 +1,94 @@
+  - name: make sure docker folder exist
+    file:
+      path: /etc/docker
+      owner: root
+      group: root
+      mode: "0755"
+      state: directory
+
+  - name: ensure daemon.json docker content
+    copy:
+      dest: /etc/docker/daemon.json  נתיב הנכון תוקן כאן
+      owner: root
+      group: root
+      mode: '0644'
+      content: |
+        {
+          "exec-opts": ["native.cgroupdriver=systemd"],
+          "log-driver": "json-file",
+          "log-opts": {
+            "max-size": "100m"
+          },
+          "storage-driver": "overlay2"
+        }
+
+  - name: make sure containerd folder exist
+    file:
+      path: /etc/containerd
+      owner: root
+      group: root
+      mode: "0755"
+      state: directory
+
+  - name: generate default containerd config
+    command: containerd config default
+    register: containerd_config_default
+    changed_when: false 
+
+  - name: write default containerd config to file
+    copy:
+      content: "{{ containerd_config_default.stdout }}"
+      dest: /etc/containerd/config.toml
+      owner: root
+      group: root
+      mode: '0644'
+    register: config_file_created
+
+  - name: ensure SystemdCgroup is true
+    replace:
+      path: /etc/containerd/config.toml
+      regexp: 'SystemdCgroup = false'
+      replace: 'SystemdCgroup = true'
+
+  - name: reload for changes
+    systemd_service:
+      daemon_reload: true
+
+  - name: restart for changes
+    service:
+      name:
+        - docker
+        - containerd
+      state: restarted
+
+  - name: swap off
+    commend: swapoff -a
+
+  - name: swap off in fstab
+    replace:
+      path: /etc/fstab
+      regexp: '^([^#].*?\sswap\s+.*)$'
+      replace: '# \1'
+
+  - name: set SELinux to permissive
+    commend: setenforce 0 
+
+  - name: ensure selinux is permissive
+    lineinfile:
+      path: /etc/selinux/config
+      regexp: '^SELINUX='
+      line: SELINUX=permissive
+
+  - name: ensure sysctl settings
+    copy:
+      dest: /etc/sysctl.d/k8s.conf
+      owner: root
+      group: root
+      mode: '0644'
+      content: |
+        net.bridge.bridge-nf-call-iptables  = 1
+        net.bridge.bridge-nf-call-ip6tables = 1
+        net.ipv4.ip_forward                 = 1
+
+  - name: apply changes
+    commend: sysctl --system
