@@ -2,15 +2,13 @@
 
 - hosts: all
   become: true
+  any_errors_fatal: true  
+
   roles:
-    - ensure_install
     - docker
+    - ensure_install
+
   tasks:
-  - name: add ssh key to yeeet
-    tags: always
-    authorized_key:
-      user: ansible_user
-      key: "{{ lookup('file', '~/.ssh/ansible.pub') }}"
   
   - name: config kubernetes repo
     copy:
