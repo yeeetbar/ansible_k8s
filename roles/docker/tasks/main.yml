@@ -1,0 +1,43 @@
+  - name: remove old docker
+    dnf:
+      name:
+        - docker
+        - docker-client 
+        - docker-client-latest
+        - docker-common
+        - docker-latest
+        - docker-latest-logrotate
+        - docker-logrotate
+        - docker-engine
+      state: absent
+
+  - name: install dnf-plugins-core for repo
+    dnf:
+      name: dnf-plugins-core
+      state: present
+
+  - name: set up repo for docker
+    get_url:
+      url: https://download.docker.com/linux/centos/docker-ce.repo
+      dest: /etc/yum.repos.d/docker-ce.repo
+      mode: '0644'
+
+  - name: install docker packages
+    dnf:
+      name:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-buildx-plugin
+        - docker-compose-plugin
+      state: present
+
+  - name: turn on docker service
+    service:
+        name: docker
+        state: started
+        enabled: true
+
+  - name: check docker 
+    shell: docker run hello-world
+
