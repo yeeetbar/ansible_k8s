@@ -4,9 +4,9 @@
   become: true
   any_errors_fatal: true  
 
-  roles:
-    - docker
-    - ensure_install
+    #roles:
+    # - docker
+    # - ensure_install
 
   tasks:
   
@@ -67,7 +67,7 @@
   become: true
   tasks:
   - name: run the join command from master
-    shell: "{{ hostvars[groups['masters'][0]].join_command_output.stdout }}"
+    shell: "{{ hostvars[groups['k8s_masters'][0]].join_command_output.stdout }}"
 
 - hosts: k8s_masters
   become: true
