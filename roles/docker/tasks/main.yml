@@ -1,5 +1,5 @@
   - name: remove old docker
-    dnf:
+    package:
       name:
         - docker
         - docker-client 
@@ -12,7 +12,7 @@
       state: absent
 
   - name: install dnf-plugins-core for repo
-    dnf:
+    package:
       name: dnf-plugins-core
       state: present
 
@@ -23,7 +23,7 @@
       mode: '0644'
 
   - name: install docker packages
-    dnf:
+    package:
       name:
         - docker-ce
         - docker-ce-cli

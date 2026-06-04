@@ -12,20 +12,20 @@
   
   - name: config kubernetes repo
     copy:
-    dest: /etc/yum.repos.d/kubernetes.repo
-    content: |
-      [kubernetes]
-      name=Kubernetes
-      baseurl=https://pkgs.k8s.io/core:/stable:/v1.36/rpm/
-      enabled=1
-      gpgcheck=1
-      gpgkey=https://pkgs.k8s.io/core:/stable:/v1.36/rpm/repodata/repomd.xml.key
-    owner: root
-    group: root
-    mode: '0644'
+      dest: /etc/yum.repos.d/kubernetes.repo
+      content: |
+        [kubernetes]
+        name=Kubernetes
+        baseurl=https://pkgs.k8s.io/core:/stable:/v1.36/rpm/
+        enabled=1
+        gpgcheck=1
+        gpgkey=https://pkgs.k8s.io/core:/stable:/v1.36/rpm/repodata/repomd.xml.key
+      owner: root
+      group: root
+      mode: '0644'
 
   - name: install kubernetes packages
-    dnf:
+    package:
       name:
         - kubelet 
         - kubeadm 
@@ -59,15 +59,15 @@
     shell: kubeadm init --apiserver-advertise-address={{ ansible_default_ipv4.address }} --pod-network-cidr=10.244.0.0/16
 
   - name: generate the token and join command
-    ansible.builtin.shell: "kubeadm token create --print-join-command"
+    shell: "kubeadm token create --print-join-command"
     register: join_command_output
 
 
 - hosts: k8s_workers
   become: true
   tasks:
-    - name: run the join command from master
-      ansible.builtin.shell: "{{ hostvars[groups['masters'][0]].join_command_output.stdout }}"
+  - name: run the join command from master
+    shell: "{{ hostvars[groups['masters'][0]].join_command_output.stdout }}"
 
 - hosts: k8s_masters
   become: true
