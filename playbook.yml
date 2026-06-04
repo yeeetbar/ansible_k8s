@@ -3,7 +3,8 @@
 - hosts: all
   become: true
   roles:
-    - base
+    - ensure_install
+    - docker
   tasks:
   - name: add ssh key to yeeet
     tags: always
