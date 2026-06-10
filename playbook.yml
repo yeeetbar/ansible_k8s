@@ -4,9 +4,9 @@
   become: true
   any_errors_fatal: true  
 
-    #roles:
-    # - docker
-    # - ensure_install
+  roles:
+   - docker
+   - ensure_install
 
   tasks:
   
